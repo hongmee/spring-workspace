@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	<settings>
+		<!-- null값이 발생하면 빈칸("")이 아닌 null로 처리 -->
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	<typeAliases>
+		<typeAlias type="kr.or.member.model.vo.Member" alias="m"/>
+		<typeAlias type="kr.or.notice.model.vo.Notice" alias="n"/>
+		<typeAlias type="kr.or.board.model.vo.Board" alias="b"/>
+		<typeAlias type="kr.or.board.model.vo.FileVO" alias="f"/>
+	</typeAliases>
+</configuration>

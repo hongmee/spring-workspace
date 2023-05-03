@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="member">
+
+	<select id="selectOneMember" parameterType="m" resultType="m">
+		select 
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl where member_id=#{memberId}
+		<if test="memberPw != null">
+		 and member_pw=#{memberPw}	
+		</if>
+	</select>
+<!-- 로그인과 아이디로 회원 정보 찾는 쿼리가 비슷하므로 다른 부분만 if문으로 나눠서 처리 가능 !
+	<select id="searchMemberId" parameterType="m" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl where member_id=#{memberId}
+	</select> -->
+	
+	<select id="search1" parameterType="kr.or.member.model.vo.SearchVO" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl
+		<choose>
+			<when test="type.equals('id')">
+			where member_id=#{keyword}
+			</when>
+			<when test="type.equals('name')">
+			where member_name like '%' || #{keyword} || '%'
+			</when>
+		</choose>
+	</select>
+	
+	<select id="search2" parameterType="m" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl
+	<!-- 1. 둘 다 입력 안한 경우 2. 아이디만 입력 3. 이름만 입력  4. 둘다 입력 -->
+	<trim prefix="where" prefixOverrides="and|or">	
+	<!-- trim 내부 안에 하나라도 동작하면 prefix값 붙여서 실행
+		처음 실행된 게 prefixOverrides값이면 그 값 지움 (and나 or면 지움) -->
+		<if test="!memberId.equals('')">
+		<!-- 아이디 값이 null이 아니면 -->
+			member_id like '%' || #{memberId} || '%'
+		</if>
+		<if test="!memberName.equals('')">
+		<!-- 이름 값이 null이 아니면 -->
+			and member_name like '%' || #{memberName} || '%'
+		</if>
+	</trim>
+	</select>
+
+	<select id="search3" resultType="string">
+		select member_id from member_tbl
+	</select>	
+	
+	<!-- 배열을 받아올 경우 HashMap으로 처리 -->
+	<select id="search4" parameterType="map" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl
+		where member_id in
+		<!-- ('user02', 'user03', 'user05') -->
+		<foreach collection="array" item="id" open="(" close=")" separator=",">
+			<!-- array에서 꺼낸 걸 id로 명칭, 괄호랑 구분자 -->
+			#{id}
+		</foreach>
+	</select>
+	
+	<select id="search5" resultType="m">
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl	
+		where member_no <![CDATA[ < ]]> 20
+		<!-- 부등호 사용 CDATA, 동적 쿼리 안쓸거면 쿼리문 전체를 감싸도 됨 ! -->
+	</select>
+	
+	<select id="selectAllMember" resultType="m">
+	<!-- resultType은 리스트가 아니라 리스트 안에 들어갈 객체를 작성하면 됨 -->
+		select
+			member_no as memberNo,
+			member_id as memberId,
+			member_pw as memberPw,
+			member_name as memberName,
+			member_phone as memberPhone,
+			member_email as memberEmail
+		from member_tbl
+	</select>
+	
+	<insert id="insertMember" parameterType="m">
+		insert into member_tbl values(member_seq.nextval, #{memberId}, #{memberPw}, #{memberName}, #{memberPhone}, #{memberEmail})
+	</insert>
+	
+	<delete id="deleteMember" parameterType="_int">
+	<!-- #{memberId}는 parameterType이 Member타입만 가능! 일반 자료형은 _parameter 사용 -->
+		delete from member_tbl where member_no = #{_parameter}
+	</delete>
+	
+	<update id="updateMember" parameterType="m">
+		update member_tbl set 
+			member_pw=#{memberPw}, 
+			member_phone=#{memberPhone}, 
+			member_email=#{memberEmail} 
+		where member_no=#{memberNo}
+	</update>
+</mapper>

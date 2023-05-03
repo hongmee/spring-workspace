@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="board">
+	<select id="selectBoardList" parameterType="map" resultType="b">
+		select * from
+	      (select rownum as rnum, b.* from
+				(select
+					board_no as boardNo,
+					board_title as boardTitle,
+					board_writer as boardWriter,
+					board_date as boardDate
+				from board order by 1 DESC) b)
+		where rnum between #{start} and #{end}
+	</select>
+	
+	<select id="totalCount" resultType="_int">
+		select count(*) from board
+	</select>
+	
+	
+	<insert id="insertBoard" parameterType="b">
+		insert into board values(board_seq.nextval, #{boardTitle}, #{boardWriter}, #{boardContent}, to_char(SYSDATE, 'YYYY-MM-DD'))
+		
+		<!-- 게시글 insert후 boardNo 조회 : 결과 데이터타입 int, 실행순서 이후에, 실행값 parameterType(b)의 boardNo에 저장 -->
+		<selectKey resultType="_int" order="AFTER" keyProperty="boardNo">
+			select max(board_no) from board
+		</selectKey>
+	</insert>
+	
+	
+	<select id="selectBoardNo" resultType="_int">
+		select max(board_no) from board
+	</select>
+	
+	<insert id="insertFile" parameterType="f">
+		insert into file_tbl values(file_seq.nextval, #{boardNo}, #{filename}, #{filepath})
+	</insert>
+	
+	
+<!-- 	<select id="selectOneBoard" parameterType="_int" resultType="b">
+		select 
+			board_no as boardNo,
+			board_title as boardTitle,
+			board_writer as boardWriter,
+			board_content as boardContent,
+			board_date as boardDate
+		from board where board_no=#{_parameter}
+	</select> -->
+	<select id="selectOneBoard" parameterType="_int" resultMap="getBoard">
+	<!-- 수행 결과는 resultMap의 id 따라감 -->
+		select *
+		from board where board_no=#{_parameter}
+	</select>
+	
+	
+	<select id="selectFileList" parameterType="_int" resultType="f">
+		select
+			file_no as fileNo,
+			board_no as boardNo,
+			filename,
+			filepath
+		from file_tbl where board_no = #{_parameter}
+	</select>
+	
+	
+	<!-- 최종 리턴하는 데이터 타입은 b -->
+	<resultMap type="b" id="getBoard">
+		<!-- 조회된 board_no은 Board객체의 boardNo에 저장 -->
+		<result column="board_no" property="boardNo"/>
+		<result column="board_title" property="boardTitle"/>
+		<result column="board_writer" property="boardWriter"/>
+		<result column="board_content" property="boardContent"/>
+		<result column="board_date" property="boardDate"/>
+		<!-- fileList는 여기서 쿼리 실행하고 쿼리에 필요한 매개변수 column에 넣음, 한줄 데이터타입 ofType, 전체 데이터 타입 javaType -->
+		<collection property="fileList" 
+			select="selectFileList"
+			column="board_no"
+			ofType="f"
+			javaType="java.util.ArrayList"
+		/>
+	</resultMap>
+	
+	
+	<update id="updateBoard" parameterType="b">
+		update board set board_title=#{boardTitle}, board_content=#{boardContent} where board_no=#{boardNo}
+	</update>
+	
+	<delete id="deleteFile" parameterType="_int">
+		delete from file_tbl where file_no=#{_parameter}
+	</delete>
+	
+	<delete id="deleteBoard" parameterType="_int">
+		delete from board where board_no=#{_parameter}
+	</delete>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd">
+
+	<!-- 
+		비어있는 Member 객체를 생성 후 setter로 값을 대입
+		Member member1 = new Member();
+		member1.setName("이윤수");
+		member1.setAge(30);
+		member1.setAddr("서울시 영등포구");
+	 -->
+	<bean id="member1" class="kr.or.iei.vo.Member">
+		<property name="name" value="이윤수" />
+		<property name="addr" value="서울시 영등포구" />	
+		<!-- 숫자도 wrapper 클래스로 처리 -->
+		<property name="age">
+			<value type="java.lang.Integer">30</value>
+		</property>
+	</bean>
+	
+	
+	<!-- 
+		매개변수 있는 생성자를 이용해서 객체 생성하면서 값 대입
+		Member member2 = new Member("이윤수1", 20, "부산");
+	 -->
+	 <!-- scope="prototype" : 계속 객체 새로 생성해서 사용 -->
+	 <bean id="member2" class="kr.or.iei.vo.Member" scope="prototype">
+	 	<constructor-arg value="이윤수1" />
+	 	<constructor-arg>
+	 		<value type="java.lang.Integer">20</value>
+	 	</constructor-arg>
+	 	<constructor-arg value="부산" />
+	 </bean>
+	 
+	 
+	 <!-- 
+	 	setter를 이용해서 MemberMgr 객체를 생성
+	 	MemberMgr mm = new MemberMgr();
+	 	mm.setMember(member1);
+	  -->
+	  <!-- member1 참조 -->
+	  <bean id="mm" class="kr.or.iei.vo.MemberMgr">
+	  	<property name="member" ref="member1" />
+	  </bean>
+	 
+</beans>
